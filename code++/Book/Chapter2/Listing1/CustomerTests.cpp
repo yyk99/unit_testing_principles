@@ -35,6 +35,6 @@ TEST_F(CustomerTests, Purchase_fails_when_not_enough_inventory)
     bool success = customer.Purchase(store, Product::Shampoo, 15);
 
     // Assert
-    ASSERT_TRUE(success);
+    ASSERT_FALSE(success);
     ASSERT_EQ(10, store.GetInventory(Product::Shampoo));
 }

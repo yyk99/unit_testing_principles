@@ -46,23 +46,23 @@ public:
         {
             _inventory[product] = quantity;
         }
+
+        // printf("inventory: %d\n", _inventory[product]);
     }
 
     int GetInventory(Product product)
     {
-#if 0
-        bool productExists = _inventory.TryGetValue(product, out int remaining);
-        return productExists ? remaining : 0;
-#else
-        return _inventory.count(product);
-#endif
+        auto pos = _inventory.find(product);
+        int cnt = (pos != _inventory.end() ? pos->second : 0);
+        // printf("cnt == %d\n", cnt);
+        return cnt;
     }
 };
 
 class Customer
 {
 public:
-    bool Purchase(Store store, Product product, int quantity)
+    bool Purchase(Store &store, Product product, int quantity)
     {
         if (!store.HasEnoughInventory(product, quantity))
         {
