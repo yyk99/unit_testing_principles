@@ -2,7 +2,7 @@
 #define __OTHER_H
 
 #include <map>
-#include <exception>
+#include <stdexcept>
 
 namespace book::chapter2::listing1 {
 #if 0
