@@ -58,6 +58,8 @@ TEST_F(CustomerTests2, Purchase_fails_when_not_enough_inventory)
     //     .Returns(false);
     EXPECT_CALL(storeMock, HasEnoughInventory(Product::Shampoo, 5))
         .WillRepeatedly(Return(false));
+    EXPECT_CALL(storeMock, RemoveInventory(Product::Shampoo, 5))
+        .Times(0);
 
     Customer customer;
 
