@@ -68,7 +68,7 @@ public:
 class Customer
 {
 public:
-    bool Purchase(Store &store, Product product, int quantity)
+    bool Purchase(IStore &store, Product product, int quantity)
     {
         if (!store.HasEnoughInventory(product, quantity))
         {

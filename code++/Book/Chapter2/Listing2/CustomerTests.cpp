@@ -5,24 +5,42 @@
 
 using namespace book::chapter2::listing2;
 
-class CustomerTests : public testing::Test
+class IStoreMock : public IStore
+{
+public:
+    MOCK_METHOD(bool, HasEnoughInventory, (Product product, int quantity), (override));
+    MOCK_METHOD(void, RemoveInventory, (Product product, int quantity), (override));
+    MOCK_METHOD(void, AddInventory, (Product product, int quantity), (override));
+    MOCK_METHOD(int, GetInventory, (Product product), (override));
+};
+
+class CustomerTests2 : public testing::Test
 {
 };
 
-#if 0
+#if 1
 
 //[Fact]
-TEST_F(CustomerTests, Purchase_succeeds_when_enough_inventory)
+TEST_F(CustomerTests2, Purchase_succeeds_when_enough_inventory)
 {
+    using ::testing::Return;
+    using ::testing::AtLeast;
+
     // Arrange
-    // auto storeMock = new Mock<IStore>();
+    IStoreMock storeMock; // = new Mock<IStore>();
     // storeMock
     //     .Setup(x = > x.HasEnoughInventory(Product.Shampoo, 5))
     //     .Returns(true);
-    auto customer = new Customer();
+    EXPECT_CALL(storeMock, HasEnoughInventory(Product::Shampoo, 5))
+        .Times(1)
+        .WillRepeatedly(Return(true));
+    EXPECT_CALL(storeMock, RemoveInventory(Product::Shampoo, 5))
+        .Times(1);
+
+    Customer customer;
 
     // Act
-    bool success = customer->Purchase(storeMock.Object, Product::Shampoo, 5);
+    bool success = customer.Purchase(storeMock, Product::Shampoo, 5);
 
     // Assert
     ASSERT_TRUE(success);
@@ -30,17 +48,21 @@ TEST_F(CustomerTests, Purchase_succeeds_when_enough_inventory)
 }
 
 //[Fact]
-TEST_F(CustomerTests, Purchase_fails_when_not_enough_inventory)
+TEST_F(CustomerTests2, Purchase_fails_when_not_enough_inventory)
 {
+    using ::testing::Return;
     // Arrange
-    auto storeMock = new Mock<IStore>();
-    storeMock
-        .Setup(x = > x.HasEnoughInventory(Product.Shampoo, 5))
-        .Returns(false);
-    auto customer = new Customer();
+    IStoreMock storeMock;
+    // storeMock
+    //     .Setup(x = > x.HasEnoughInventory(Product.Shampoo, 5))
+    //     .Returns(false);
+    EXPECT_CALL(storeMock, HasEnoughInventory(Product::Shampoo, 5))
+        .WillRepeatedly(Return(false));
+
+    Customer customer;
 
     // Act
-    bool success = customer->Purchase(storeMock.Object, Product::Shampoo, 5);
+    bool success = customer.Purchase(storeMock, Product::Shampoo, 5);
 
     // Assert
     ASSERT_FALSE(success);
@@ -79,7 +101,6 @@ public:
     MOCK_METHOD(int, GetY, (), (const, override));
 };
 
-using ::testing::AtLeast;                         // #1
 
 class Painter {
 public:
@@ -103,8 +124,12 @@ protected:
 
 TEST(PainterTest, CanDrawSomething)
 {
+    using ::testing::AtLeast;
+    using ::testing::Return;
+
     MockTurtle turtle;
     EXPECT_CALL(turtle, PenDown()).Times(AtLeast(1));
+    EXPECT_CALL(turtle, GoTo(0,0)).Times(1);
 
     Painter painter(&turtle);
 
