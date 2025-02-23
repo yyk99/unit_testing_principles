@@ -1,4 +1,4 @@
-set (_test "test_ch2_lst1")
+set (_test "test_ch2_lst2")
 add_executable(
   ${_test} 
   CustomerTests.cpp 
@@ -7,7 +7,8 @@ add_executable(
 
 target_link_libraries(
   ${_test}
-  GTest::gtest_main
+  GTest::gtest
+  GTest::gmock_main
 )
 
 include(GoogleTest)

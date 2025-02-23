@@ -32,7 +32,7 @@
             "name": "(gdb) Attach",
             "type": "cppdbg",
             "request": "attach",
-            "program": "enter program name, for example ${workspaceFolder}/a.out",
+            "program": "${workspaceFolder}/build-ubuntu/bin/test_2_1",
             "MIMode": "gdb",
             "setupCommands": [
                 {

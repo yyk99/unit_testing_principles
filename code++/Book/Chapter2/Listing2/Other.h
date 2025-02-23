@@ -1,10 +1,10 @@
-﻿#ifndef LISTING1_OTHER_H
-#define LISTING1_OTHER_H
+﻿#ifndef LISTING2_OTHER_H
+#define LISTING2_OTHER_H
 
 #include <map>
 #include <stdexcept>
 
-namespace book::chapter2::listing1 {
+namespace book::chapter2::listing2 {
 #if 0
 }
 #endif
@@ -15,9 +15,17 @@ enum Product
     Book
 };
 
-class Store
+class IStore
 {
-private:
+public:
+    virtual bool HasEnoughInventory(Product product, int quantity) = 0;
+    virtual void RemoveInventory(Product product, int quantity)  = 0;
+    virtual void AddInventory(Product product, int quantity) = 0;
+    virtual int GetInventory(Product product) = 0;
+};
+
+class Store : public IStore
+{
     std::map<Product, int> _inventory;
 
 public:
@@ -46,8 +54,6 @@ public:
         {
             _inventory[product] = quantity;
         }
-
-        // printf("inventory: %d\n", _inventory[product]);
     }
 
     int GetInventory(Product product)

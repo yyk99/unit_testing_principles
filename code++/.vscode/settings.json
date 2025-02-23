@@ -1,0 +1,7 @@
+{
+    "cmake.generator": "Unix Makefiles",
+    "cSpell.words": [
+        "gmock",
+        "googletest"
+    ]
+}
