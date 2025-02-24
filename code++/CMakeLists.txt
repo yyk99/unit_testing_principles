@@ -35,3 +35,5 @@ set_target_properties(gmock PROPERTIES FOLDER "TestLibs")
 set_target_properties(gmock_main PROPERTIES FOLDER "TestLibs")
 set_target_properties(gtest PROPERTIES FOLDER "TestLibs")
 set_target_properties(gtest_main PROPERTIES FOLDER "TestLibs")
+
+add_subdirectory(Unsorted)
