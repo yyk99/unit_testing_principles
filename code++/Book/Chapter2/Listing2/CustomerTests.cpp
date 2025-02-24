@@ -81,7 +81,10 @@ TEST_F(CustomerTests2, Purchase_fails_when_not_enough_inventory)
 class Turtle
 {
 public:
-    virtual ~Turtle() {}
+    virtual ~Turtle() {
+        std::cout << "~Turtle(): " << (void *) this << "\n";
+    }
+
     virtual void PenUp() = 0;
     virtual void PenDown() = 0;
     virtual void Forward(int distance) = 0;
@@ -109,7 +112,11 @@ public:
     Painter(Turtle *api)
     : m_api(api)
     {
+        std::cout << "Painter(Turtle *api)\n";
+    }
 
+    virtual ~Painter() {
+        std::cout << "~Painter(): " << (void *) this << "\n";
     }
 
     bool DrawCircle(int x, int y, int r)
@@ -119,23 +126,28 @@ public:
 
         return true;
     }
+
 protected:
     Turtle *m_api;
 };
 
-
+/// @brief An example from gmock for Dummies 
+/// @param --gtest_filter=PainterTest.CanDrawSomething
+/// @param  
 TEST(PainterTest, CanDrawSomething)
 {
     using ::testing::AtLeast;
     using ::testing::Return;
 
     MockTurtle turtle;
-    EXPECT_CALL(turtle, PenDown()).Times(AtLeast(1));
-    EXPECT_CALL(turtle, GoTo(0,0)).Times(1);
+    {
+        EXPECT_CALL(turtle, PenDown()).Times(AtLeast(1));
+        EXPECT_CALL(turtle, GoTo(0, 0)).Times(1);
 
-    Painter painter(&turtle);
+        Painter painter(&turtle);
 
-    EXPECT_TRUE(painter.DrawCircle(0, 0, 10));
+        EXPECT_TRUE(painter.DrawCircle(0, 0, 10));
+    }
 }
 
 #endif
