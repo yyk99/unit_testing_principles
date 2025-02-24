@@ -3,6 +3,7 @@ add_executable(
   ${_test} 
   CustomerTests.cpp 
   Other.cpp
+  Other.h
 )
 
 target_link_libraries(
