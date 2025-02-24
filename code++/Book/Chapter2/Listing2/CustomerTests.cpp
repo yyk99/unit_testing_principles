@@ -1,4 +1,4 @@
-﻿#include <gmock/gmock.h>
+#include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
 #include "Other.h"
@@ -81,10 +81,7 @@ TEST_F(CustomerTests2, Purchase_fails_when_not_enough_inventory)
 class Turtle
 {
 public:
-    virtual ~Turtle() {
-        std::cout << "~Turtle(): " << (void *) this << "\n";
-    }
-
+    virtual ~Turtle() {}
     virtual void PenUp() = 0;
     virtual void PenDown() = 0;
     virtual void Forward(int distance) = 0;
@@ -110,18 +107,14 @@ public:
 class Painter {
 public:
     Painter(Turtle *api)
-    : m_api(api)
-    {
-        std::cout << "Painter(Turtle *api)\n";
-    }
+        : m_api(api)
+    {}
 
-    virtual ~Painter() {
-        std::cout << "~Painter(): " << (void *) this << "\n";
-    }
+    virtual ~Painter() {}
 
-    bool DrawCircle(int x, int y, int r)
+    bool DrawCircle(int x,int y,int r)
     {
-        m_api->GoTo(x, y);
+        m_api->GoTo(x,y);
         m_api->PenDown();
 
         return true;
@@ -134,20 +127,19 @@ protected:
 /// @brief An example from gmock for Dummies 
 /// @param --gtest_filter=PainterTest.CanDrawSomething
 /// @param  
-TEST(PainterTest, CanDrawSomething)
+TEST(PainterTest,CanDrawSomething)
 {
     using ::testing::AtLeast;
     using ::testing::Return;
 
     MockTurtle turtle;
-    {
-        EXPECT_CALL(turtle, PenDown()).Times(AtLeast(1));
-        EXPECT_CALL(turtle, GoTo(0, 0)).Times(1);
 
-        Painter painter(&turtle);
+    EXPECT_CALL(turtle,PenDown()).Times(AtLeast(1));
+    EXPECT_CALL(turtle,GoTo(0,0)).Times(1);
 
-        EXPECT_TRUE(painter.DrawCircle(0, 0, 10));
-    }
+    Painter painter(&turtle);
+
+    EXPECT_TRUE(painter.DrawCircle(0,0,10));
 }
 
 #endif
