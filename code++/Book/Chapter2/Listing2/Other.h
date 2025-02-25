@@ -1,4 +1,4 @@
-﻿#ifndef LISTING2_OTHER_H
+#ifndef LISTING2_OTHER_H
 #define LISTING2_OTHER_H
 
 #include <map>
@@ -18,6 +18,8 @@ enum Product
 class IStore
 {
 public:
+    virtual ~IStore() {};
+
     virtual bool HasEnoughInventory(Product product, int quantity) = 0;
     virtual void RemoveInventory(Product product, int quantity)  = 0;
     virtual void AddInventory(Product product, int quantity) = 0;

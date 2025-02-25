@@ -1,4 +1,4 @@
-﻿#include <gmock/gmock.h>
+#include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
 #include "Other.h"
@@ -107,35 +107,39 @@ public:
 class Painter {
 public:
     Painter(Turtle *api)
-    : m_api(api)
-    {
+        : m_api(api)
+    {}
 
-    }
+    virtual ~Painter() {}
 
-    bool DrawCircle(int x, int y, int r)
+    bool DrawCircle(int x,int y,int r)
     {
-        m_api->GoTo(x, y);
+        m_api->GoTo(x,y);
         m_api->PenDown();
 
         return true;
     }
+
 protected:
     Turtle *m_api;
 };
 
-
-TEST(PainterTest, CanDrawSomething)
+/// @brief An example from gmock for Dummies 
+/// @param --gtest_filter=PainterTest.CanDrawSomething
+/// @param  
+TEST(PainterTest,CanDrawSomething)
 {
     using ::testing::AtLeast;
     using ::testing::Return;
 
     MockTurtle turtle;
-    EXPECT_CALL(turtle, PenDown()).Times(AtLeast(1));
-    EXPECT_CALL(turtle, GoTo(0,0)).Times(1);
+
+    EXPECT_CALL(turtle,PenDown()).Times(AtLeast(1));
+    EXPECT_CALL(turtle,GoTo(0,0)).Times(1);
 
     Painter painter(&turtle);
 
-    EXPECT_TRUE(painter.DrawCircle(0, 0, 10));
+    EXPECT_TRUE(painter.DrawCircle(0,0,10));
 }
 
 #endif
