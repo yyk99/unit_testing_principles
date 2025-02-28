@@ -17,6 +17,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 cmake_policy(SET CMP0135 NEW)
 
+enable_testing()
+include (CTest)
+
 include(FetchContent)
 FetchContent_Declare(
   googletest
@@ -27,7 +30,6 @@ FetchContent_Declare(
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
-enable_testing()
 
 add_subdirectory(Book)
 
