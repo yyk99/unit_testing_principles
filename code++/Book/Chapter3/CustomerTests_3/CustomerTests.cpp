@@ -32,19 +32,19 @@ public:
 // [Fact]
 TEST_F(CustomerTests,Purchase_succeeds_when_enough_inventory)
 {
-    bool success = _sut.Purchase(*_store,Product::Shampoo,5);
+    bool success = _sut.Purchase(_store,Product::Shampoo,5);
 
     ASSERT_TRUE(success);
     ASSERT_EQ(5,_store.GetInventory(Product::Shampoo));
 }
 
-//    [Fact]
-TEST_F(CuPurchase_fails_when_not_enough_inventory()
-       {
-           bool success = _sut.Purchase(_store,Product.Shampoo,15);
+// [Fact]
+TEST_F(CustomerTests,Purchase_fails_when_not_enough_inventory)
+{
+    bool success = _sut.Purchase(_store,Product::Shampoo,15);
 
-           Assert.False(success);
-           Assert.Equal(10,_store.GetInventory(Product.Shampoo));
-       }
+    ASSERT_FALSE(success);
+    ASSERT_EQ(10,_store.GetInventory(Product::Shampoo));
 }
-}
+
+} // namespaces
