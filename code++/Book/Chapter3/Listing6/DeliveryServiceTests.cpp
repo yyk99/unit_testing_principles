@@ -13,16 +13,40 @@ public:
 
     static DateTime Now() { return DateTime{}; }
 
-    DateTime &AddDays(double d)
+    DateTime AddDays(double d) const
     {
-        m_current_time += (time_t)(m_current_time * 24 * 3600);
-        return *this;
+        DateTime r = *this;
+
+        r.m_current_time += (time_t)(d * 24 * 3600);
+        return r;
     }
 
     bool operator>=(DateTime const &right) const
     {
         return m_current_time >= right.m_current_time;
     }
+};
+
+
+class DateTimeF : public testing::Test {
+};
+
+TEST_F(DateTimeF, tomorrow_greater_than_today)
+{
+    auto today = DateTime::Now();
+    auto tomorrow = today.AddDays(1.0);
+
+    ASSERT_TRUE(tomorrow >= today);
+    ASSERT_FALSE(today >= tomorrow);
+};
+
+TEST_F(DateTimeF, today_equal_today)
+{
+    auto today = DateTime::Now();
+    auto today_too = today.AddDays(0);
+
+    ASSERT_TRUE(today_too >= today);
+    ASSERT_TRUE(today >= today_too);
 };
 
 class Delivery
@@ -40,14 +64,14 @@ public:
     }
 };
 
-typedef std::pair<int, bool> InlineData;
+typedef std::pair<int, bool> IntBool;
 
-class DeliveryServiceTests : public testing::TestWithParam<InlineData> 
+class DeliveryServiceTestsIntBool : public testing::TestWithParam<IntBool> 
 {
 };
 
 
-TEST_P(DeliveryServiceTests, Detects_an_invalid_delivery_date)
+TEST_P(DeliveryServiceTestsIntBool, Detects_an_invalid_delivery_date)
 {
     int daysFromNow = GetParam().first; 
     bool expected = GetParam().second;
@@ -71,13 +95,13 @@ TEST_P(DeliveryServiceTests, Detects_an_invalid_delivery_date)
 // [InlineData(2, true)]
 // [Theory]
 
-INSTANTIATE_TEST_SUITE_P(Group1,
-    DeliveryServiceTests,
+INSTANTIATE_TEST_SUITE_P(Group_IntBool,
+    DeliveryServiceTestsIntBool,
     testing::Values(
-        InlineData(-1, false),
-        InlineData(0, false),
-        InlineData(1, false),
-        InlineData(2, true)
+        IntBool(-1, false),
+        IntBool(0, false),
+        IntBool(1, false),
+        IntBool(2, true)
     )
 );
 
