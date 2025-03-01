@@ -1,53 +1,7 @@
 ﻿#include <gtest/gtest.h>
 
+#include "DateTime.h"
 #include "DebuggingConsole.h"
-
-class DateTime
-{
-    time_t m_current_time;
-public:
-    DateTime() 
-    {
-        time(&m_current_time);
-    }
-
-    static DateTime Now() { return DateTime{}; }
-
-    DateTime AddDays(double d) const
-    {
-        DateTime r = *this;
-
-        r.m_current_time += (time_t)(d * 24 * 3600);
-        return r;
-    }
-
-    bool operator>=(DateTime const &right) const
-    {
-        return m_current_time >= right.m_current_time;
-    }
-};
-
-
-class DateTimeF : public testing::Test {
-};
-
-TEST_F(DateTimeF, tomorrow_greater_than_today)
-{
-    auto today = DateTime::Now();
-    auto tomorrow = today.AddDays(1.0);
-
-    ASSERT_TRUE(tomorrow >= today);
-    ASSERT_FALSE(today >= tomorrow);
-};
-
-TEST_F(DateTimeF, today_equal_today)
-{
-    auto today = DateTime::Now();
-    auto today_too = today.AddDays(0);
-
-    ASSERT_TRUE(today_too >= today);
-    ASSERT_TRUE(today >= today_too);
-};
 
 class Delivery
 {
