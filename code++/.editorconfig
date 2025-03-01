@@ -4,4 +4,29 @@
 
 root = true
 
-[.cpp, .h]
+[*]
+charset = utf-8
+indent_style = space
+indent_size = 4
+
+[CMakeLists.txt]
+
+indent_style = space
+indent_size = 2
+trim_trailing_whitespace = true
+insert_final_newline = true
+
+[*.{c,cxx,cpp,h}]
+
+indent_style = space
+indent_size = 4
+trim_trailing_whitespace = true
+insert_final_newline = true
+
+cpp_indent_namespace_contents = false
+
+cpp_namespace_declaration_braces = end_of_line
+cpp_type_declaration_braces = end_of_line
+
+cpp_space_after_comma = true
+cpp_space_pointer_reference_alignment = ignore;

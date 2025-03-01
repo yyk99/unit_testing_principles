@@ -3,7 +3,7 @@
 #include "Other.h"
 
 using namespace book::chapter2::listing1;
-  
+
 class CustomerTests : public testing::Test
 {
 

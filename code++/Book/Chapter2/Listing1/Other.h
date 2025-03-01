@@ -4,8 +4,12 @@
 #include <map>
 #include <stdexcept>
 
-namespace book::chapter2::listing1 {
+namespace book {
+namespace chapter2 {
+namespace listing1 {
 #if 0
+}
+}
 }
 #endif
 
@@ -62,7 +66,7 @@ public:
 class Customer
 {
 public:
-    bool Purchase(Store &store, Product product, int quantity)
+    bool Purchase(Store& store, Product product, int quantity)
     {
         if (!store.HasEnoughInventory(product, quantity))
         {
@@ -75,7 +79,7 @@ public:
     }
 };
 
-
 } // namespace
-
+}
+}
 #endif
