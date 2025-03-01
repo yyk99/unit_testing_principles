@@ -1,106 +1,141 @@
 ﻿#include <gtest/gtest.h>
-#include <chrono>
 
-typedef std::chrono::system_clock DateTime;
+#include "DebuggingConsole.h"
+
+class DateTime
+{
+    time_t m_current_time;
+public:
+    DateTime() 
+    {
+        time(&m_current_time);
+    }
+
+    static DateTime Now() { return DateTime{}; }
+
+    DateTime &AddDays(double d)
+    {
+        m_current_time += (time_t)(m_current_time * 24 * 3600);
+        return *this;
+    }
+
+    bool operator>=(DateTime const &right) const
+    {
+        return m_current_time >= right.m_current_time;
+    }
+};
 
 class Delivery
 {
 public:
-    DateTime::rep Date;
+    DateTime Date;
 };
 
 class DeliveryService
 {
-    public: bool IsDeliveryValid(Delivery delivery)
+public:
+    bool IsDeliveryValid(Delivery delivery)
     {
-        return delivery.Date >= DateTime::now.AddDays(1.999);
+        return delivery.Date >= DateTime::Now().AddDays(1.999);
+    }
+};
+
+typedef std::pair<int, bool> InlineData;
+
+class DeliveryServiceTests : public testing::TestWithParam<InlineData> 
+{
+};
+
+
+TEST_P(DeliveryServiceTests, Detects_an_invalid_delivery_date)
+{
+    int daysFromNow = GetParam().first; 
+    bool expected = GetParam().second;
+
+    CONSOLE("Detects_an_invalid_delivery_date: " << daylight << ", " << expected);
+
+    {
+        DeliveryService sut;
+        DateTime deliveryDate = DateTime::Now().AddDays(daysFromNow);
+        Delivery delivery;
+        delivery.Date = deliveryDate;
+
+        bool isValid = sut.IsDeliveryValid(delivery);
+
+        ASSERT_EQ(expected, isValid);
+    }
+};
+// [InlineData(-1, false)]
+// [InlineData(0, false)]
+// [InlineData(1, false)]
+// [InlineData(2, true)]
+// [Theory]
+
+INSTANTIATE_TEST_SUITE_P(Group1,
+    DeliveryServiceTests,
+    testing::Values(
+        InlineData(-1, false),
+        InlineData(0, false),
+        InlineData(1, false),
+        InlineData(2, true)
+    )
+);
+
+
+#if 0
+    // [InlineData(-1)]
+    // [InlineData(0)]
+    // [InlineData(1)]
+    // [Theory] 
+    void
+        Detects_an_invalid_delivery_date2(int daysFromNow)
+    {
+        DeliveryService sut = new DeliveryService();
+        DateTime deliveryDate = DateTime.Now.AddDays(daysFromNow);
+        Delivery delivery = new Delivery{
+            Date = deliveryDate};
+
+        bool isValid = sut.IsDeliveryValid(delivery);
+
+        Assert.False(isValid);
     }
 }
 
+//[Fact]
+void The_soonest_delivery_date_is_two_days_from_now()
+{
+    DeliveryService sut = new DeliveryService();
+    DateTime deliveryDate = DateTime.Now.AddDays(2);
+    Delivery delivery = new Delivery{
+        Date = deliveryDate};
 
-class DeliveryServiceTests
-    {
-        [InlineData(-1, false)]
-        [InlineData(0, false)]
-        [InlineData(1, false)]
-        [InlineData(2, true)]
-        [Theory]
-        public void Detects_an_invalid_delivery_date(int daysFromNow, bool expected)
-        {
-            DeliveryService sut = new DeliveryService();
-            DateTime deliveryDate = DateTime.Now.AddDays(daysFromNow);
-            Delivery delivery = new Delivery
-            {
-                Date = deliveryDate
-            };
+    bool isValid = sut.IsDeliveryValid(delivery);
 
-            bool isValid = sut.IsDeliveryValid(delivery);
-
-            Assert.Equal(expected, isValid);
-        }
-
-        [InlineData(-1)]
-        [InlineData(0)]
-        [InlineData(1)]
-        [Theory]
-        public void Detects_an_invalid_delivery_date2(int daysFromNow)
-        {
-            DeliveryService sut = new DeliveryService();
-            DateTime deliveryDate = DateTime.Now.AddDays(daysFromNow);
-            Delivery delivery = new Delivery
-            {
-                Date = deliveryDate
-            };
-
-            bool isValid = sut.IsDeliveryValid(delivery);
-
-            Assert.False(isValid);
-        }
-    }
-
-
-        [Fact]
-        public void The_soonest_delivery_date_is_two_days_from_now()
-        {
-            DeliveryService sut = new DeliveryService();
-            DateTime deliveryDate = DateTime.Now.AddDays(2);
-            Delivery delivery = new Delivery
-            {
-                Date = deliveryDate
-            };
-
-            bool isValid = sut.IsDeliveryValid(delivery);
-
-            Assert.True(isValid);
-        }
-
-        [Theory]
-        [MemberData(nameof(Data))]
-        public void Detects_an_invalid_delivery_date3(
-            DateTime deliveryDate,
-            bool expected)
-        {
-            DeliveryService sut = new DeliveryService();
-            Delivery delivery = new Delivery
-            {
-                Date = deliveryDate
-            };
-
-            bool isValid = sut.IsDeliveryValid(delivery);
-
-            Assert.Equal(expected, isValid);
-        }
-
-        public static List<object[]> Data()
-        {
-            return new List<object[]>
-            {
-                new object[] { DateTime.Now.AddDays(-1), false },
-                new object[] { DateTime.Now, false },
-                new object[] { DateTime.Now.AddDays(1), false },
-                new object[] { DateTime.Now.AddDays(2), true }
-            };
-        }
-    }
-
+    Assert.True(isValid);
 }
+
+// [Theory]
+// [MemberData(nameof(Data))]
+void Detects_an_invalid_delivery_date3(
+        DateTime deliveryDate,
+        bool expected)
+{
+    DeliveryService sut = new DeliveryService();
+    Delivery delivery = new Delivery{
+        Date = deliveryDate};
+
+    bool isValid = sut.IsDeliveryValid(delivery);
+
+    Assert.Equal(expected, isValid);
+}
+
+static List<object[]> Data()
+{
+    return new List<object[]>{
+        new object[]{DateTime.Now.AddDays(-1), false},
+        new object[]{DateTime.Now, false},
+        new object[]{DateTime.Now.AddDays(1), false},
+        new object[]{DateTime.Now.AddDays(2), true}};
+}
+
+#endif
