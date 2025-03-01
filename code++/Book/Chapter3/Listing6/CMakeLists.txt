@@ -1,4 +1,4 @@
-set (_test "test_chapter3_fluentassertions_1")
+set (_test "test_chapter3_listing_6")
 add_executable(
   ${_test} 
   CalculatorTests.cpp 

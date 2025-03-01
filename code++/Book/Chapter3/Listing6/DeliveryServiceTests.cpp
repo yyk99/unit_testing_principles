@@ -1,10 +1,24 @@
-﻿using System;
-using System.Collections.Generic;
-using Xunit;
+﻿#include <gtest/gtest.h>
+#include <chrono>
 
-namespace Book.Chapter3.Listing6
+typedef std::chrono::system_clock DateTime;
+
+class Delivery
 {
-    public class DeliveryServiceTests
+public:
+    DateTime::rep Date;
+};
+
+class DeliveryService
+{
+    public: bool IsDeliveryValid(Delivery delivery)
+    {
+        return delivery.Date >= DateTime::now.AddDays(1.999);
+    }
+}
+
+
+class DeliveryServiceTests
     {
         [InlineData(-1, false)]
         [InlineData(0, false)]
@@ -42,6 +56,8 @@ namespace Book.Chapter3.Listing6
 
             Assert.False(isValid);
         }
+    }
+
 
         [Fact]
         public void The_soonest_delivery_date_is_two_days_from_now()
@@ -87,16 +103,4 @@ namespace Book.Chapter3.Listing6
         }
     }
 
-    public class Delivery
-    {
-        public DateTime Date { get; set; }
-    }
-
-    public class DeliveryService
-    {
-        public bool IsDeliveryValid(Delivery delivery)
-        {
-            return delivery.Date >= DateTime.Now.AddDays(1.999);
-        }
-    }
 }
