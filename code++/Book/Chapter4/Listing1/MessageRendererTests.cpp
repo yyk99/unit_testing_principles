@@ -1,127 +1,135 @@
-﻿using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using Xunit;
+﻿#include <gtest/gtest.h>
+#include <string>
+#include <sstream>
+#include <vector>
 
-namespace Book.Chapter4.Listing1
+class Message
 {
-    public class MessageRendererTests
-    {
-        [Fact]
-        public void Rendering_a_message()
-        {
-            var sut = new MessageRenderer();
-            var message = new Message
-            {
-                Header = "h",
-                Body = "b",
-                Footer = "f"
-            };
+public:
+    std::string Header;
+    std::string Body;
+    std::string Footer;
+};
 
-            string html = sut.Render(message);
-
-            Assert.Equal("<h1>h</h1><b>b</b><i>f</i>", html);
-        }
-
-        [Fact]
-        public void MessageRenderer_uses_correct_sub_renderers()
-        {
-            var sut = new MessageRenderer();
-
-            IReadOnlyList<IRenderer> renderers = sut.SubRenderers;
-
-            Assert.Equal(3, renderers.Count);
-            Assert.IsAssignableFrom<HeaderRenderer>(renderers[0]);
-            Assert.IsAssignableFrom<BodyRenderer>(renderers[1]);
-            Assert.IsAssignableFrom<FooterRenderer>(renderers[2]);
-        }
-
-        [Fact(Skip = "Example of how not to write tests")]
-        public void MessageRenderer_is_implemented_correctly()
-        {
-            string sourceCode = File.ReadAllText(@"<project path>\MessageRenderer.cs");
-
-            Assert.Equal(
-                @"
-public class MessageRenderer : IRenderer
+class IRenderer
 {
-    public IReadOnlyList<IRenderer> SubRenderers { get; }
-
-    public MessageRenderer()
+public:
+    virtual std::string Render(Message const &message) = 0;
+    virtual ~IRenderer() {}
+};
+class FooterRenderer : public IRenderer
+{
+public:
+    std::string Render(Message const &message) override
     {
-        SubRenderers = new List<IRenderer>
-        {
-            new HeaderRenderer(),
-            new BodyRenderer(),
-            new FooterRenderer()
-        };
+        return "<i>" + message.Footer + "</i>";
     }
+};
 
-    public string Render(Message message)
+class BodyRenderer : public IRenderer
+{
+public:
+    std::string Render(Message const &message) override
     {
-        return SubRenderers
-            .Select(x => x.Render(message))
-            .Aggregate("", (str1, str2) => str1 + str2);
+        return "<b>" + message.Body + "</b>";
     }
-}", sourceCode);
-        }
-    }
+};
 
-    public class Message
+class HeaderRenderer : public IRenderer
+{
+public:
+    std::string Render(Message const &message) override
     {
-        public string Header { get; set; }
-        public string Body { get; set; }
-        public string Footer { get; set; }
+        return "<h1>" + message.Header + "</h1>";
     }
+};
 
-    public interface IRenderer
+class MessageRenderer : public IRenderer
+{
+public:
+    std::vector<IRenderer *> SubRenderers;
+
+    MessageRenderer()
+    : SubRenderers {
+        new HeaderRenderer,
+        new BodyRenderer,
+        new FooterRenderer,
+    }
     {
-        string Render(Message message);
     }
 
-    public class MessageRenderer : IRenderer
+    std::string Render(Message const &message) override
     {
-        public IReadOnlyList<IRenderer> SubRenderers { get; }
-
-        public MessageRenderer()
-        {
-            SubRenderers = new List<IRenderer>
-            {
-                new HeaderRenderer(),
-                new BodyRenderer(),
-                new FooterRenderer()
-            };
-        }
-
-        public string Render(Message message)
-        {
-            return SubRenderers
-                .Select(x => x.Render(message))
-                .Aggregate("", (str1, str2) => str1 + str2);
-        }
+        std::ostringstream ss;
+        for (auto r : SubRenderers)
+            ss << r->Render(message);
+        return ss.str();
     }
+};
 
-    public class FooterRenderer : IRenderer
+class MessageRendererTests : public testing::Test {
+};
+
+// [Fact]
+TEST_F(MessageRendererTests, Rendering_a_message)
+{
+    MessageRenderer sut;
+    Message message
     {
-        public string Render(Message message)
-        {
-            return $"<i>{message.Footer}</i>";
-        }
-    }
+        /*Header = */ "h",
+        /*Body = */ "b",
+        /*Footer = */ "f"
+    };
 
-    public class BodyRenderer : IRenderer
-    {
-        public string Render(Message message)
-        {
-            return $"<b>{message.Body}</b>";
-        }
-    }
+    std::string html = sut.Render(message);
 
-    public class HeaderRenderer : IRenderer
-    {
-        public string Render(Message message)
-        {
-            return $"<h1>{message.Header}</h1>";
-        }
-    }
+    ASSERT_EQ(std::string("<h1>h</h1><b>b</b><i>f</i>"), html);
 }
+
+// [Fact]
+TEST_F(MessageRendererTests, MessageRenderer_uses_correct_sub_renderers)
+{
+    MessageRenderer sut;
+
+    auto& renderers = sut.SubRenderers;
+
+    ASSERT_EQ(3, renderers.size());
+    // Assert.IsAssignableFrom<HeaderRenderer>(renderers[0]);
+    // Assert.IsAssignableFrom<BodyRenderer>(renderers[1]);
+    // Assert.IsAssignableFrom<FooterRenderer>(renderers[2]);
+}
+
+// [Fact(Skip = "Example of how not to write tests")]
+TEST_F(MessageRendererTests, MessageRenderer_is_implemented_correctly)
+{
+    GTEST_SKIP() << "Example of how not to write tests";
+
+//     std::string sourceCode = File.ReadAllText(@"<project path>\MessageRenderer.cs");
+
+//             Assert.Equal(
+//                 @"
+// public class MessageRenderer : IRenderer
+// {
+//     public IReadOnlyList<IRenderer> SubRenderers { get; }
+
+//     public MessageRenderer()
+//     {
+//         SubRenderers = new List<IRenderer>
+//         {
+//             new HeaderRenderer(),
+//             new BodyRenderer(),
+//             new FooterRenderer()
+//         };
+//     }
+
+//     public string Render(Message message)
+//     {
+//         return SubRenderers
+//             .Select(x => x.Render(message))
+//             .Aggregate("", (str1, str2) => str1 + str2);
+//     }
+// }", sourceCode);
+//         }
+//     }
+}
+
