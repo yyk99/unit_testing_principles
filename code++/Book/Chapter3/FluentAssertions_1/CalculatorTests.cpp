@@ -1,28 +1,30 @@
-﻿using FluentAssertions;
-using Xunit;
+﻿#include <gtest/gtest.h>
 
-namespace Book.Chapter3.FluentAssertions_1
+// using FluentAssertions;
+// using Xunit;
+
+class Calculator
 {
-    public class CalculatorTests
+public:
+    double Sum(double first, double second)
     {
-        [Fact]
-        public void Sum_of_two_numbers()
-        {
-            double first = 10;
-            double second = 20;
-            var sut = new Calculator();
-
-            double result = sut.Sum(first, second);
-
-            result.Should().Be(30);
-        }
+        return first + second;
     }
+};
 
-    public class Calculator
-    {
-        public double Sum(double first, double second)
-        {
-            return first + second;
-        }
-    }
+class CalculatorTests : public testing::Test
+{
+};
+
+// [Fact]
+TEST_F(CalculatorTests,Sum_of_two_numbers)
+{
+    double first = 10;
+    double second = 20;
+    Calculator sut{};
+
+    double result = sut.Sum(first,second);
+
+    ASSERT_DOUBLE_EQ(30, result);
 }
+
