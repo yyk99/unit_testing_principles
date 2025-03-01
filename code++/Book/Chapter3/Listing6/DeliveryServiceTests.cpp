@@ -60,25 +60,37 @@ INSTANTIATE_TEST_SUITE_P(Group_IntBool,
 );
 
 
-#if 0
-    // [InlineData(-1)]
-    // [InlineData(0)]
-    // [InlineData(1)]
-    // [Theory] 
-    void
-        Detects_an_invalid_delivery_date2(int daysFromNow)
+class DeliveryServiceTestsInt : public testing::TestWithParam<int> 
+{
+};
+
+TEST_P(DeliveryServiceTestsInt, Detects_an_invalid_delivery_date2)
+{
+    int daysFromNow = GetParam();
     {
-        DeliveryService sut = new DeliveryService();
-        DateTime deliveryDate = DateTime.Now.AddDays(daysFromNow);
-        Delivery delivery = new Delivery{
-            Date = deliveryDate};
+        DeliveryService sut;
+        DateTime deliveryDate = DateTime::Now().AddDays(daysFromNow);
+        Delivery delivery;
+        delivery.Date = deliveryDate;
 
         bool isValid = sut.IsDeliveryValid(delivery);
 
-        Assert.False(isValid);
+        ASSERT_FALSE(isValid);
     }
 }
 
+// [InlineData(-1)]
+// [InlineData(0)]
+// [InlineData(1)]
+// [Theory]
+
+INSTANTIATE_TEST_SUITE_P(Group_Int,
+    DeliveryServiceTestsInt,
+    testing::Values(-1, 0, 1)
+);
+
+
+#if 0
 //[Fact]
 void The_soonest_delivery_date_is_two_days_from_now()
 {
@@ -107,13 +119,15 @@ void Detects_an_invalid_delivery_date3(
     Assert.Equal(expected, isValid);
 }
 
-static List<object[]> Data()
-{
-    return new List<object[]>{
-        new object[]{DateTime.Now.AddDays(-1), false},
-        new object[]{DateTime.Now, false},
-        new object[]{DateTime.Now.AddDays(1), false},
-        new object[]{DateTime.Now.AddDays(2), true}};
-}
+
+// static List<object[]> Data()
+// {
+//     return new List<object[]>{
+//         new object[]{DateTime.Now.AddDays(-1), false},
+//         new object[]{DateTime.Now, false},
+//         new object[]{DateTime.Now.AddDays(1), false},
+//         new object[]{DateTime.Now.AddDays(2), true}};
+// }
 
 #endif
+
