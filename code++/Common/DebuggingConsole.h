@@ -10,7 +10,7 @@
 /// @brief 
 inline void attachDebugConsole()
 {
-#if _DEBUG
+#ifndef NDEBUG
 #   if WIN32
     if (::GetStdHandle(STD_OUTPUT_HANDLE) == NULL) {
         // these next few lines create and attach a console
@@ -29,7 +29,7 @@ inline void attachDebugConsole()
 #endif
 }
 
-#if _DEBUG
+#ifndef NDEBUG
 #   define CONSOLE(x) do { std::cout << __func__ << ":" << x << '\n';  } while(0)
 #else
 #   define CONSOLE(x)
