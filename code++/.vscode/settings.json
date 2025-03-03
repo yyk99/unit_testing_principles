@@ -3,5 +3,8 @@
     "cSpell.words": [
         "gmock",
         "googletest"
-    ]
+    ],
+    "files.associations": {
+        "cctype": "cpp"
+    }
 }

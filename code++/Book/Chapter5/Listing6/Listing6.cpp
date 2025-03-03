@@ -1,41 +1,49 @@
-﻿namespace Book.Chapter5.Listing6
+﻿#include "gtest/gtest.h"
+
+#include "string_trim.h"
+
+class User
 {
-    public class User
-    {
-        private string _name;
-        public string Name
-        {
-            get => _name;
-            set => _name = NormalizeName(value);
-        }
+private:
+    std::string _name;
+    
+public:
+    std::string Name() const { return _name; }
 
-        private string NormalizeName(string name)
-        {
-            string result = (name ?? "").Trim();
-
-            if (result.Length > 50)
-                return result.Substring(0, 50);
-
-            return result;
-        }
+    void Name(std::string const& value) {
+        _name = NormalizeName(value);
     }
 
-    public class UserController
+private:
+    std::string NormalizeName(std::string const& name)
     {
-        public void RenameUser(int userId, string newName)
-        {
-            User user = GetUserFromDatabase(userId);
-            user.Name = newName;
-            SaveUserToDatabase(user);
-        }
+        std::string result = trim_copy(name);
 
-        private void SaveUserToDatabase(User user)
-        {
-        }
+        if (result.size() > 50)
+            return result.substr(0, 50);
 
-        private User GetUserFromDatabase(int userId)
-        {
-            return new User();
-        }
+        return result;
     }
-}
+};
+
+class UserController
+{
+public:
+    void RenameUser(int userId, std::string newName)
+    {
+        User user = GetUserFromDatabase(userId);
+        user.Name(newName);
+        SaveUserToDatabase(user);
+    }
+
+private:
+    void SaveUserToDatabase(User user)
+    {
+    }
+
+private:
+    User GetUserFromDatabase(int userId)
+    {
+        return User{};
+    }
+};
