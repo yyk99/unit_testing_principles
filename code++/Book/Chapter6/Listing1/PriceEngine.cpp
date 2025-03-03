@@ -27,9 +27,9 @@ public:
     }
 };
 
-class CustomerControllerTests
+class CustomerControllerTests : public testing::Test
 {
-}
+};
 
 // [Fact]
 TEST_F(CustomerControllerTests, Discount_of_two_products)
