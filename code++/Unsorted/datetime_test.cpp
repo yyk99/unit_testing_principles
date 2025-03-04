@@ -26,3 +26,12 @@ TEST_F(DateTimeF, today_equal_today)
     ASSERT_TRUE(today_too >= today);
     ASSERT_TRUE(today >= today_too);
 };
+
+
+TEST_F(DateTimeF, epoch_time)
+{
+    DateTime actual{1970, 1, 1};
+    DateTime actual2{1970, 1, 1};
+
+    ASSERT_EQ(actual, actual2);
+}
