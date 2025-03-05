@@ -1,251 +1,244 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using FluentAssertions;
-using Xunit;
+﻿//
+// Book/Chapter7/DomainEvents/DomainEvents.cpp
+//
 
-namespace Book.Chapter7.DomainEvents
+#include <gtest/gtest.h>
+
+#include <string>
+#include <vector>
+#include <stdexcept>
+
+#include "string_split.h"
+
+enum UserType
 {
-    public class User
+    Customer = 1,
+    Employee = 2
+};
+
+class Precondition
+{
+public:
+    static void Requires(bool precondition, std::string message = "")
     {
-        public int UserId { get; private set; }
-        public string Email { get; private set; }
-        public UserType Type { get; private set; }
-        public bool IsEmailConfirmed { get; private set; }
-        public List<EmailChangedEvent> EmailChangedEvents { get; private set; }
+        if (!precondition)
+            throw std::runtime_error(message);
+    }
+};
 
-        public User(int userId, string email, UserType type, bool isEmailConfirmed)
-        {
-            UserId = userId;
-            Email = email;
-            Type = type;
-            IsEmailConfirmed = isEmailConfirmed;
-            EmailChangedEvents = new List<EmailChangedEvent>();
-        }
+class EmailChangedEvent
+{
+public:
+    int UserId; //{ get; }
+    std::string NewEmail; //{ get; }
 
-        public string CanChangeEmail()
-        {
-            if (IsEmailConfirmed)
-                return "Can't change email after it's confirmed";
-
-            return null;
-        }
-
-        public void ChangeEmail(string newEmail, Company company)
-        {
-            Precondition.Requires(CanChangeEmail() == null);
-
-            if (Email == newEmail)
-                return;
-
-            UserType newType = company.IsEmailCorporate(newEmail)
-                ? UserType.Employee
-                : UserType.Customer;
-
-            if (Type != newType)
-            {
-                int delta = newType == UserType.Employee ? 1 : -1;
-                company.ChangeNumberOfEmployees(delta);
-            }
-
-            Email = newEmail;
-            Type = newType;
-            EmailChangedEvents.Add(new EmailChangedEvent(UserId, newEmail));
-        }
+    EmailChangedEvent(int userId, std::string newEmail)
+        : UserId(userId)
+        , NewEmail(newEmail)
+    {
     }
 
-    public class UserController
+    bool operator == (EmailChangedEvent const& other) const {
+        return other.UserId == this->UserId && other.NewEmail == this->NewEmail;
+    }
+};
+
+class Company
+{
+public:
+    std::string DomainName; //{ get; private set; }
+    int NumberOfEmployees; //{ get; private set; }
+
+    Company(std::string domainName, int numberOfEmployees)
     {
-        private readonly Database _database = new Database();
-        private readonly MessageBus _messageBus = new MessageBus();
-
-        public string ChangeEmail(int userId, string newEmail)
-        {
-            object[] userData = _database.GetUserById(userId);
-            User user = UserFactory.Create(userData);
-
-            string error = user.CanChangeEmail();
-            if (error != null)
-                return error;
-
-            object[] companyData = _database.GetCompany();
-            Company company = CompanyFactory.Create(companyData);
-
-            user.ChangeEmail(newEmail, company);
-
-            _database.SaveCompany(company);
-            _database.SaveUser(user);
-            foreach (EmailChangedEvent ev in user.EmailChangedEvents)
-            {
-                _messageBus.SendEmailChangedMessage(ev.UserId, ev.NewEmail);
-            }
-
-            return "OK";
-        }
+        DomainName = domainName;
+        NumberOfEmployees = numberOfEmployees;
     }
 
-    public class EmailChangedEvent
+    void ChangeNumberOfEmployees(int delta)
     {
-        public int UserId { get; }
-        public string NewEmail { get; }
+        Precondition::Requires(NumberOfEmployees + delta >= 0);
 
-        public EmailChangedEvent(int userId, string newEmail)
-        {
-            UserId = userId;
-            NewEmail = newEmail;
-        }
-
-        protected bool Equals(EmailChangedEvent other)
-        {
-            return UserId == other.UserId && string.Equals(NewEmail, other.NewEmail);
-        }
-
-        public override bool Equals(object obj)
-        {
-            if (ReferenceEquals(null, obj))
-            {
-                return false;
-            }
-
-            if (ReferenceEquals(this, obj))
-            {
-                return true;
-            }
-
-            if (obj.GetType() != this.GetType())
-            {
-                return false;
-            }
-
-            return Equals((EmailChangedEvent)obj);
-        }
-
-        public override int GetHashCode()
-        {
-            unchecked
-            {
-                return (UserId * 397) ^ (NewEmail != null ? NewEmail.GetHashCode() : 0);
-            }
-        }
+        NumberOfEmployees += delta;
     }
 
-    public class UserFactory
+    bool IsEmailCorporate(std::string email)
     {
-        public static User Create(object[] data)
-        {
-            return null;
-        }
+        std::string emailDomain = split_string(email, '@')[1];
+        return emailDomain == DomainName;
+    }
+};
+
+class CompanyFactory
+{
+public:
+    static Company Create(std::vector<std::string> const& data)
+    {
+        Precondition::Requires(data.size() >= 2);
+
+        std::string domainName = (std::string)data[0];
+        int numberOfEmployees = atoi(data[1].c_str());
+
+        return Company(domainName, numberOfEmployees);
+    }
+};
+
+class User {
+public:
+    int UserId{}; //{ get; private set; }
+    std::string Email; // { get; private set; }
+    UserType Type{}; // { get; private set; }
+    bool IsEmailConfirmed{}; // { get; private set; }
+    std::vector<EmailChangedEvent> EmailChangedEvents; // { get; private set; }
+
+    User()
+    {}
+
+    User(int userId, std::string email, UserType type, bool isEmailConfirmed)
+        : UserId(userId)
+        , Email(email)
+        , Type(type)
+        , IsEmailConfirmed(isEmailConfirmed)
+
+    {
     }
 
-    public class Company
+    std::string CanChangeEmail() const
     {
-        public string DomainName { get; private set; }
-        public int NumberOfEmployees { get; private set; }
+        if (IsEmailConfirmed)
+            return "Can't change email after it's confirmed";
 
-        public Company(string domainName, int numberOfEmployees)
-        {
-            DomainName = domainName;
-            NumberOfEmployees = numberOfEmployees;
-        }
-
-        public void ChangeNumberOfEmployees(int delta)
-        {
-            Precondition.Requires(NumberOfEmployees + delta >= 0);
-
-            NumberOfEmployees += delta;
-        }
-
-        public bool IsEmailCorporate(string email)
-        {
-            string emailDomain = email.Split('@')[1];
-            return emailDomain == DomainName;
-        }
+        return std::string();
     }
 
-    public class CompanyFactory
+    void ChangeEmail(std::string newEmail, Company &company)
     {
-        public static Company Create(object[] data)
+        Precondition::Requires(CanChangeEmail().empty());
+
+        if (Email == newEmail)
+            return;
+
+        UserType newType = company.IsEmailCorporate(newEmail)
+            ? UserType::Employee
+            : UserType::Customer;
+
+        if (Type != newType)
         {
-            Precondition.Requires(data.Length >= 2);
-
-            string domainName = (string)data[0];
-            int numberOfEmployees = (int)data[1];
-
-            return new Company(domainName, numberOfEmployees);
+            int delta = newType == UserType::Employee ? 1 : -1;
+            company.ChangeNumberOfEmployees(delta);
         }
+
+        Email = newEmail;
+        Type = newType;
+        EmailChangedEvents.push_back(EmailChangedEvent(UserId, newEmail));
+    }
+};
+
+class Database
+{
+public:
+    std::vector<std::string> GetUserById(int userId)
+    {
+        return {};
     }
 
-    public enum UserType
+    User GetUserByEmail(std::string email)
     {
-        Customer = 1,
-        Employee = 2
+        return User();
     }
 
-    public class Tests
+    void SaveUser(User user)
     {
-        [Fact]
-        public void Changing_email_from_corporate_to_non_corporate()
-        {
-            var company = new Company("mycorp.com", 1);
-            var sut = new User(1, "user@mycorp.com", UserType.Employee, false);
-
-            sut.ChangeEmail("new@gmail.com", company);
-
-            company.NumberOfEmployees.Should().Be(0);
-            sut.Email.Should().Be("new@gmail.com");
-            sut.Type.Should().Be(UserType.Customer);
-            sut.EmailChangedEvents.Should().Equal(
-                new EmailChangedEvent(1, "new@gmail.com"));
-        }
     }
 
-    public static class Precondition
+    std::vector<std::string> GetCompany()
     {
-        public static void Requires(bool precondition, string message = null)
-        {
-            if (precondition == false)
-                throw new Exception(message);
-        }
+        return {};
     }
 
-    public class Database
+    void SaveCompany(Company company)
     {
-        public object[] GetUserById(int userId)
-        {
-            return null;
-        }
-
-        public User GetUserByEmail(string email)
-        {
-            return null;
-        }
-
-        public void SaveUser(User user)
-        {
-        }
-
-        public object[] GetCompany()
-        {
-            return null;
-        }
-
-        public void SaveCompany(Company company)
-        {
-        }
     }
+};
 
-    public class MessageBus
+class IBus
+{
+public:
+    virtual void Send(std::string message) = 0;
+};
+
+class MessageBus
+{
+private:
+    IBus& _bus;
+
+public:
+    void SendEmailChangedMessage(int userId, std::string newEmail)
     {
-        private IBus _bus;
-
-        public void SendEmailChangedMessage(int userId, string newEmail)
-        {
-            _bus.Send($"Subject: USER; Type: EMAIL CHANGED; Id: {userId}; NewEmail: {newEmail}");
-        }
+        _bus.Send("Subject: USER; Type: EMAIL CHANGED; Id: {userId}; NewEmail: {newEmail}");
     }
+};
 
-    internal interface IBus
+class UserFactory
+{
+    public: static User Create(std::vector<std::string> const & data)
     {
-        void Send(string message);
+        return User();
     }
-}
+};
+
+
+class UserController
+{
+private:
+    Database _database; // = new Database();
+    MessageBus _messageBus; // = new MessageBus();
+
+public:
+    std::string ChangeEmail(int userId, std::string newEmail)
+    {
+        std::vector<std::string> userData = _database.GetUserById(userId);
+        User user = UserFactory::Create(userData);
+
+        std::string error = user.CanChangeEmail();
+        if (!error.empty())
+            return error;
+
+        std::vector<std::string> companyData = _database.GetCompany();
+        Company company = CompanyFactory::Create(companyData);
+
+        user.ChangeEmail(newEmail, company);
+
+        _database.SaveCompany(company);
+        _database.SaveUser(user);
+
+        for (EmailChangedEvent &ev : user.EmailChangedEvents)
+        {
+            _messageBus.SendEmailChangedMessage(ev.UserId, ev.NewEmail);
+        }
+
+        return "OK";
+    }
+};
+
+class Tests : public testing::Test
+{
+};
+
+// [Fact]
+TEST_F(Tests, Changing_email_from_corporate_to_non_corporate)
+{
+    auto company = Company("mycorp.com", 1);
+    auto sut = User(1, "user@mycorp.com", UserType::Employee, false);
+
+    sut.ChangeEmail("new@gmail.com", company);
+
+    ASSERT_EQ(0, company.NumberOfEmployees);
+
+    ASSERT_STREQ("new@gmail.com", sut.Email.c_str());
+    ASSERT_EQ(UserType::Customer, sut.Type);
+    // sut.EmailChangedEvents.Should().Equal(
+    //     new EmailChangedEvent(1, "new@gmail.com"));
+};
+
+

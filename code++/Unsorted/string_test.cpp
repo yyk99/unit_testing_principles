@@ -16,4 +16,6 @@ TEST_F(StringTestF, split_regular)
 {
     auto actual = split_string("foo@example.com", '@');
     ASSERT_EQ(2, actual.size());
+    ASSERT_STREQ("foo", actual[0].c_str());
+    ASSERT_STREQ("example.com", actual[1].c_str());
 }

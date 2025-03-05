@@ -2,7 +2,8 @@
     "cmake.generator": "Unix Makefiles",
     "cSpell.words": [
         "gmock",
-        "googletest"
+        "googletest",
+        "STREQ"
     ],
     "files.associations": {
         "cctype": "cpp",
