@@ -19,4 +19,4 @@ endmacro(add_unsorted_test)
 
 add_unsorted_test(tiny_test)
 add_unsorted_test(datetime_test)
-
+add_unsorted_test(string_test)

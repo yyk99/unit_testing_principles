@@ -5,6 +5,8 @@
         "googletest"
     ],
     "files.associations": {
-        "cctype": "cpp"
+        "cctype": "cpp",
+        "exception": "cpp",
+        "cstddef": "cpp"
     }
 }
