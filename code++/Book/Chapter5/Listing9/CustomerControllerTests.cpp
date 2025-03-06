@@ -5,6 +5,8 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
+#include "DebuggingConsole.h"
+
 class IEmailGateway
 {
 public:
@@ -137,6 +139,7 @@ public:
 
 class Mock_IEmailGateway : public IEmailGateway
 {
+public:
     // MOCK_METHOD(ReturnType, MethodName, (Args...), (Specs...));
     // void SendReceipt(std::string email, std::string productName, int quantity) override
     MOCK_METHOD(void, SendReceipt, (std::string, std::string, int ), (override));
@@ -163,7 +166,7 @@ public:
         Product product = _productRepository.GetById(productId);
 
         bool isSuccess = customer.Purchase(_mainStore, product, quantity);
-
+        CONSOLE("isSuccess = " << isSuccess); // debug
         if (isSuccess)
         {
             _emailGateway.SendReceipt(customer.Email, product.Name, quantity);
@@ -183,7 +186,13 @@ TEST_F(CustomerControllerTests, Successful_purchase)
 {
     GTEST_SKIP() << "Concept illustration only";
 
+    using ::testing::Return;
+    using ::testing::AtLeast;
+
     auto mock = Mock_IEmailGateway();
+    EXPECT_CALL(mock, SendReceipt("customer@email.com", "Shampoo", 5))
+        .Times(1);
+        //.WillRepeatedly(Return(true));
     auto sut = CustomerController(mock);
 
     bool isSuccess = sut.Purchase(
