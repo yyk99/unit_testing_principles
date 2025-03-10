@@ -5,3 +5,4 @@
 add_subdirectory(CanExecute)
 add_subdirectory(DomainEvents)
 add_subdirectory(Refactored_1)
+add_subdirectory(Refactored_2)
