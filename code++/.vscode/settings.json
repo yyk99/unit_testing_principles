@@ -8,6 +8,14 @@
     "files.associations": {
         "cctype": "cpp",
         "exception": "cpp",
-        "cstddef": "cpp"
+        "cstddef": "cpp",
+        "array": "cpp",
+        "*.tcc": "cpp",
+        "memory": "cpp",
+        "istream": "cpp",
+        "functional": "cpp",
+        "tuple": "cpp",
+        "utility": "cpp",
+        "variant": "cpp"
     }
 }
