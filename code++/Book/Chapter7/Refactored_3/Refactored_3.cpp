@@ -245,6 +245,27 @@ TEST_F(Tests, Changing_email_to_the_same_one)
     ASSERT_EQ(Customer, sut.Type);
 }
 
+
+#include <tuple>
+
+typedef std::tuple<std::string, std::string, bool> InlineData ;
+
+class CompanyEmailP : public testing::TestWithParam<InlineData> 
+{
+};
+
+TEST_P(CompanyEmailP, Differentiates_a_corporate_email_from_non_corporate)
+{
+    std::string domain = std::get<0>(GetParam());
+    std::string email = std::get<1>(GetParam());
+    bool expected = std::get<2>(GetParam());
+
+    auto sut = Company(domain, 0);
+    bool isEmailCorporate = sut.IsEmailCorporate(email);
+
+    ASSERT_EQ(expected, isEmailCorporate);
+}
+
 // [InlineData("mycorp.com", "email@mycorp.com", true)]
 // [InlineData("mycorp.com", "email@gmail.com", false)]
 // [Theory]
@@ -257,3 +278,10 @@ TEST_F(Tests, Changing_email_to_the_same_one)
 
 //     ASSERT_EQ(expectedResult, isEmailCorporate);
 // };
+INSTANTIATE_TEST_SUITE_P(Group_DomainEmailBool,
+    CompanyEmailP,
+    testing::Values(
+        InlineData("mycorp.com", "email@mycorp.com", true),
+        InlineData("mycorp.com", "email@gmail.com", false)
+    )
+);
