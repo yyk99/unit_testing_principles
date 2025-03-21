@@ -1,94 +1,115 @@
-﻿namespace Book.Chapter7.SampleProject
+﻿#include "gtest/gtest.h"
+
+#include <vector>
+#include <string>
+#include <stdexcept>
+
+#include "string_split.h"
+
+enum UserType
 {
-    public class User
+    Customer = 1,
+    Employee = 2
+};
+
+class User;
+class Database
+{
+public:
+    static std::vector<std::string> GetUserById(int userId)
     {
-        public int UserId { get; private set; }
-        public string Email { get; private set; }
-        public UserType Type { get; private set; }
-
-        public void ChangeEmail(int userId, string newEmail)
-        {
-            object[] data = Database.GetUserById(userId);
-            UserId = userId;
-            Email = (string)data[1];
-            Type = (UserType)data[2];
-
-            if (Email == newEmail)
-                return;
-
-            //bool isEmailTaken = Database.GetUserByEmail(newEmail) != null;
-            //if (isEmailTaken)
-            //    return "Email is taken";
-
-            object[] companyData = Database.GetCompany();
-            string companyDomainName = (string)companyData[0];
-            int numberOfEmployees = (int)companyData[1];
-
-            string emailDomain = newEmail.Split('@')[1];
-            bool isEmailCorporate = emailDomain == companyDomainName;
-            UserType newType = isEmailCorporate
-                ? UserType.Employee
-                : UserType.Customer;
-
-            if (Type != newType)
-            {
-                int delta = newType == UserType.Employee ? 1 : -1;
-                int newNumber = numberOfEmployees + delta;
-                Database.SaveCompany(newNumber);
-            }
-
-            Email = newEmail;
-            Type = newType;
-
-            Database.SaveUser(this);
-            MessageBus.SendEmailChangedMessage(UserId, newEmail);
-        }
+        return {};
     }
 
-    public enum UserType
+public:
+    static User GetUserByEmail(std::string email);
+
+public:
+    static void SaveUser(User& user)
     {
-        Customer = 1,
-        Employee = 2
     }
 
-    public class Database
+public:
+    static std::vector<std::string> GetCompany()
     {
-        public static object[] GetUserById(int userId)
-        {
-            return null;
-        }
-
-        public static User GetUserByEmail(string email)
-        {
-            return null;
-        }
-
-        public static void SaveUser(User user)
-        {
-        }
-
-        public static object[] GetCompany()
-        {
-            return null;
-        }
-
-        public static void SaveCompany(int newNumber)
-        {
-        }
+        return {};
     }
 
-    public class MessageBus
+public:
+    static void SaveCompany(int newNumber)
     {
-        private static IBus _bus;
+    }
+};
 
-        public static void SendEmailChangedMessage(int userId, string newEmail)
+class IBus
+{
+public:
+    virtual void Send(std::string message) = 0;
+};
+
+class MessageBus
+{
+private:
+    static IBus& _bus;
+
+public:
+    static void SendEmailChangedMessage(int userId, std::string newEmail)
+    {
+        _bus.Send("Subject: USER; Type: EMAIL CHANGED; Id: {userId}; NewEmail: {newEmail}");
+    }
+};
+
+
+class User
+{
+public:
+    int UserId; //{ get; private set; }
+public:
+    std::string Email; //{ get; private set; }
+public:
+    UserType Type; //{ get; private set; }
+
+public:
+    void ChangeEmail(int userId, std::string newEmail)
+    {
+        std::vector<std::string> data = Database::GetUserById(userId);
+        UserId = userId;
+        Email = (std::string)data[1];
+        Type = (UserType)(atoi(data[2].c_str()));
+
+        if (Email == newEmail)
+            return;
+
+        //bool isEmailTaken = Database.GetUserByEmail(newEmail) != null;
+        //if (isEmailTaken)
+        //    return "Email is taken";
+
+        std::vector<std::string> companyData = Database::GetCompany();
+        std::string companyDomainName = companyData[0];
+        int numberOfEmployees = atoi(companyData[1].c_str());
+
+        std::string emailDomain = split_string(newEmail, '@')[1];
+        bool isEmailCorporate = emailDomain == companyDomainName;
+        UserType newType = isEmailCorporate
+            ? UserType::Employee
+            : UserType::Customer;
+
+        if (Type != newType)
         {
-            _bus.Send($"Subject: USER; Type: EMAIL CHANGED; Id: {userId}; NewEmail: {newEmail}");
+            int delta = newType == UserType::Employee ? 1 : -1;
+            int newNumber = numberOfEmployees + delta;
+            Database::SaveCompany(newNumber);
         }
-    }
 
-    internal interface IBus
-    {
-        void Send(string message);
+        Email = newEmail;
+        Type = newType;
+
+        Database::SaveUser(*this);
+        MessageBus::SendEmailChangedMessage(UserId, newEmail);
     }
+};
+
+User Database::GetUserByEmail(std::string email)
+{
+    return {};
 }
